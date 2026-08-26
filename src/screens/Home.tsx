@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ThemeBackground } from '@/components/ThemeBackground';
-import { AnalogClock } from '@/components/Clock';
+import { AnalogClock, DigitalClock } from '@/components/Clock';
 import { Toggle } from '@/components/Toggle';
 import { Sheet } from '@/components/Sheet';
 import { PrimaryButton, GhostButton } from '@/components/ui';
@@ -8,23 +8,34 @@ import { formatTimeShort, todayLabel, greeting, minutesToNextAlarm, nextAlarmLab
 import { factOfDay } from '@/lib/facts';
 import { getTheme } from '@/lib/themes';
 import { hapticSoft, hapticMedium } from '@/lib/haptic';
-import type { AppState, GratitudeEntry } from '@/lib/types';
+import type { Alarm, AppState, GratitudeEntry } from '@/lib/types';
 import { Sun, Bell, CheckCircle2, Circle, Sparkles, ArrowRight, Heart } from 'lucide-react';
 
 interface Props {
   state: AppState;
   onNavigate: (s: 'alarms' | 'focus' | 'tasks' | 'sounds' | 'themes' | 'facts' | 'boring' | 'meditation' | 'editorial' | 'premium') => void;
   onToggleRoutine: (id: string) => void;
+  onToggleAlarm: (id: string, enabled: boolean) => void;
   onAddGratitude: (text: string) => void;
 }
 
-export function Home({ state, onNavigate, onToggleRoutine, onAddGratitude }: Props) {
+export function Home({ state, onNavigate, onToggleRoutine, onToggleAlarm, onAddGratitude }: Props) {
   const [gratitudeOpen, setGratitudeOpen] = useState(false);
   const [gratitudeText, setGratitudeText] = useState('');
+  const [, setNow] = useState(() => Date.now());
   const theme = getTheme(state.theme);
   const fact = factOfDay();
   const enabledAlarms = state.alarms.filter((a) => a.enabled);
-  const nextAlarm = enabledAlarms[0];
+  useEffect(() => {
+    const tick = window.setInterval(() => setNow(Date.now()), 30000);
+    return () => window.clearInterval(tick);
+  }, []);
+  const nextAlarm = enabledAlarms.reduce<Alarm | undefined>((closest, alarm) => {
+    if (!closest) return alarm;
+    const closestMinutes = minutesToNextAlarm(closest.time, closest.days, closest.repeat);
+    const alarmMinutes = minutesToNextAlarm(alarm.time, alarm.days, alarm.repeat);
+    return alarmMinutes < closestMinutes ? alarm : closest;
+  }, undefined);
   const nextIn = nextAlarm ? minutesToNextAlarm(nextAlarm.time, nextAlarm.days, nextAlarm.repeat) : 0;
 
   const routineDone = state.routine.filter((r) => r.done).length;
@@ -38,15 +49,15 @@ export function Home({ state, onNavigate, onToggleRoutine, onAddGratitude }: Pro
           {/* Clock */}
           <div className="flex flex-col items-center animate-fade-in">
             <div className={`rounded-full p-2 shadow-card ${theme.dark ? 'bg-white' : 'bg-white/60 backdrop-blur-sm'}`}>
-              <AnalogClock size={140} showSeconds={false} />
+              {state.clockStyle === 'analog' ? <AnalogClock size={140} showSeconds={false} /> : <DigitalClock size="large" />}
             </div>
             <p className="mt-5 text-sm font-medium tracking-wide opacity-60">{todayLabel()}</p>
             <h1 className="mt-1 font-display text-2xl font-medium">{greeting()}</h1>
           </div>
 
           {/* Next alarm */}
-          {nextAlarm && (
-            <button onClick={() => onNavigate('alarms')} className="press mt-6 w-full overflow-hidden rounded-3xl glass border border-white/40 shadow-soft">
+           {nextAlarm && (
+             <div role="button" tabIndex={0} onClick={() => onNavigate('alarms')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onNavigate('alarms'); }} className="press mt-6 w-full cursor-pointer overflow-hidden rounded-3xl glass border border-white/40 shadow-soft">
               <div className="flex items-center justify-between px-5 py-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/70">
@@ -58,11 +69,13 @@ export function Home({ state, onNavigate, onToggleRoutine, onAddGratitude }: Pro
                   </div>
                 </div>
                 <div className="text-right">
-                  <Toggle on={nextAlarm.enabled} onChange={() => onNavigate('alarms')} />
+                   <span onClick={(event) => event.stopPropagation()}>
+                     <Toggle on={nextAlarm.enabled} onChange={(enabled) => { onToggleAlarm(nextAlarm.id, enabled); hapticSoft(); }} />
+                   </span>
                   <p className="mt-1 text-[11px] opacity-50">{nextAlarmLabel(nextIn)}</p>
                 </div>
               </div>
-            </button>
+             </div>
           )}
 
           {/* Gratitude */}
@@ -145,14 +158,6 @@ export function Home({ state, onNavigate, onToggleRoutine, onAddGratitude }: Pro
             </button>
           </div>
 
-          {/* Editorial */}
-          <button onClick={() => onNavigate('editorial')}
-            className="press mt-3 w-full rounded-3xl glass border border-white/40 p-5 text-left shadow-soft">
-            <p className="text-[11px] font-semibold uppercase tracking-wider opacity-50" style={{ color: theme.textOn }}>What you consume matters</p>
-            <p className="mt-2 font-display text-base font-medium leading-snug" style={{ color: theme.textOn }}>
-              "Is this something I chose, or something that chose me?"
-            </p>
-          </button>
         </div>
       </div>
 
