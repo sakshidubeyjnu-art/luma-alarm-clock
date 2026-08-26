@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ThemeBackground } from '@/components/ThemeBackground';
-import { PrimaryButton, GhostButton } from '@/components/ui';
+import { PrimaryButton } from '@/components/ui';
 import { TimePicker } from '@/components/TimePicker';
 import { themes } from '@/lib/themes';
 import type { ThemeId } from '@/lib/types';
@@ -62,6 +62,7 @@ export function Onboarding({ onComplete }: Props) {
           </div>
           <div className="px-6 pb-10">
             <PrimaryButton onClick={() => setStep(5)}>Continue</PrimaryButton>
+            <button onClick={back} className="press mt-3 w-full py-2 text-sm text-ink/50">Back</button>
           </div>
         </div>
       </div>
@@ -89,6 +90,7 @@ export function Onboarding({ onComplete }: Props) {
         </div>
         <div className="px-6 pb-10">
           <PrimaryButton onClick={() => onComplete(wakeTime, theme)}>Start using Luma</PrimaryButton>
+          <button onClick={() => setStep(4)} className="press mt-3 w-full py-2 text-sm text-ink/50">Back</button>
           <p className="mt-4 text-center text-xs text-ink/40">By continuing you agree to our Terms & Privacy Policy</p>
         </div>
       </div>
