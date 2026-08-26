@@ -86,12 +86,12 @@ export function Premium({ state, onUpdate, onBack }: Props) {
             <GhostButton onClick={onBack}>Restore purchases</GhostButton>
           </div>
 
-          <div className="mt-5 flex justify-center gap-4 text-xs text-ink/40">
-            <button onClick={onBack} className="press-sm">Terms</button>
-            <span>·</span>
-            <button onClick={onBack} className="press-sm">Privacy</button>
-            <span>·</span>
-            <button onClick={onBack} className="press-sm">Manage subscription</button>
+           <div className="mt-5 flex justify-center gap-4 text-xs text-ink/40">
+             <span>Terms</span>
+             <span aria-hidden="true">·</span>
+             <span>Privacy</span>
+             <span aria-hidden="true">·</span>
+             <span>Manage subscription</span>
           </div>
 
           <p className="mt-4 text-center text-xs text-ink/35">Cancel anytime. No fake scarcity, no pressure.</p>
