@@ -26,7 +26,7 @@ export function AnalogClock({ size = 180, showSeconds = true }: { size?: number;
 
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="drop-shadow-sm">
-      <circle cx={cx} cy={cy} r={r} fill="#ffffff" stroke="#1a1a1f" strokeWidth={1.5} />
+      <circle cx={cx} cy={cy} r={r} fill="#fffaf0" stroke="#25283a" strokeWidth={1.5} />
       <circle cx={cx} cy={cy} r={r - 6} fill="none" stroke="#1a1a1f" strokeWidth={0.5} opacity={0.15} />
 
       {/* Tick marks */}
@@ -39,7 +39,7 @@ export function AnalogClock({ size = 180, showSeconds = true }: { size?: number;
           <line key={i}
             x1={cx + inner * Math.cos(angle)} y1={cy + inner * Math.sin(angle)}
             x2={cx + outer * Math.cos(angle)} y2={cy + outer * Math.sin(angle)}
-            stroke="#1a1a1f" strokeWidth={isHour ? 1.5 : 0.5} opacity={isHour ? 0.9 : 0.4}
+             stroke="#25283a" strokeWidth={isHour ? 1.5 : 0.5} opacity={isHour ? 0.9 : 0.4}
           />
         );
       })}
@@ -52,24 +52,24 @@ export function AnalogClock({ size = 180, showSeconds = true }: { size?: number;
           <text key={n}
             x={cx + nr * Math.cos(angle)} y={cy + nr * Math.sin(angle)}
             textAnchor="middle" dominantBaseline="central"
-            fontSize={size * 0.085} fontFamily="Fraunces, Georgia, serif" fill="#1a1a1f" fontWeight={500}
+             fontSize={size * 0.085} fontFamily="Fraunces, Georgia, serif" fill="#25283a" fontWeight={500}
           >{n}</text>
         );
       })}
 
       {/* Hour hand */}
       <line x1={cx} y1={cy} x2={cx + hourLen * Math.cos(hourAngle)} y2={cy + hourLen * Math.sin(hourAngle)}
-        stroke="#1a1a1f" strokeWidth={4} strokeLinecap="round" />
+         stroke="#25283a" strokeWidth={4} strokeLinecap="round" />
       {/* Minute hand */}
       <line x1={cx} y1={cy} x2={cx + minuteLen * Math.cos(minuteAngle)} y2={cy + minuteLen * Math.sin(minuteAngle)}
-        stroke="#1a1a1f" strokeWidth={2.5} strokeLinecap="round" />
+         stroke="#25283a" strokeWidth={2.5} strokeLinecap="round" />
       {/* Second hand */}
       {showSeconds && (
         <line x1={cx} y1={cy} x2={cx + secondLen * Math.cos(secondAngle)} y2={cy + secondLen * Math.sin(secondAngle)}
-          stroke="#1a1a1f" strokeWidth={1} strokeLinecap="round" opacity={0.7} />
+           stroke="#c97854" strokeWidth={1} strokeLinecap="round" opacity={0.8} />
       )}
 
-      <circle cx={cx} cy={cy} r={3.5} fill="#1a1a1f" />
+       <circle cx={cx} cy={cy} r={3.5} fill="#25283a" />
     </svg>
   );
 }
