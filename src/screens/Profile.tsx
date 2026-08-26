@@ -1,16 +1,17 @@
-import { ScreenHeader, Row, SectionLabel, GhostButton, PrimaryButton } from '@/components/ui';
+import { ScreenHeader, Row, SectionLabel } from '@/components/ui';
 import { getTheme } from '@/lib/themes';
 import { getSound } from '@/lib/sounds';
 import { hapticSoft } from '@/lib/haptic';
 import type { AppState } from '@/lib/types';
-import { Bell, Moon, Sun, Palette, Volume2, Clock, Sparkles, Heart, Crown, ChevronRight } from 'lucide-react';
+import { Bell, Moon, Sun, Volume2, Clock, Heart, Crown, ChevronRight } from 'lucide-react';
 
 interface Props {
   state: AppState;
   onNavigate: (s: 'themes' | 'sounds' | 'premium' | 'settings' | 'auth') => void;
+  onUpdate: (patch: Partial<AppState>) => void;
 }
 
-export function Profile({ state, onNavigate }: Props) {
+export function Profile({ state, onNavigate, onUpdate }: Props) {
   const theme = getTheme(state.theme);
   const morningSound = getSound(state.morningSound);
   const focusSound = getSound(state.focusSound);
@@ -92,7 +93,12 @@ export function Profile({ state, onNavigate }: Props) {
         <div className="mx-4 overflow-hidden rounded-3xl bg-white shadow-soft">
           <Row label="Settings" onClick={() => onNavigate('settings')} right={<ChevronRight className="h-4 w-4 text-ink/30" />} />
           <div className="border-t border-paper-fog" />
-          <Row label="Sign in" onClick={() => onNavigate('auth')} right={<ChevronRight className="h-4 w-4 text-ink/30" />} />
+           <Row
+             label={state.authed ? 'Sign out' : 'Sign in'}
+             sublabel={state.authed ? 'Preferences are saved locally' : undefined}
+             onClick={() => state.authed ? onUpdate({ authed: false }) : onNavigate('auth')}
+             right={<ChevronRight className="h-4 w-4 text-ink/30" />}
+           />
         </div>
 
         <div className="px-4 pt-6">
