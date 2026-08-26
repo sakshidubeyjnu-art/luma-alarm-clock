@@ -3,14 +3,14 @@ import { Toggle } from '@/components/Toggle';
 import { hapticSoft } from '@/lib/haptic';
 import { getSound } from '@/lib/sounds';
 import { getTheme } from '@/lib/themes';
-import type { AppState } from '@/lib/types';
+import type { AppState, Screen } from '@/lib/types';
 import { ChevronRight } from 'lucide-react';
 
 interface Props {
   state: AppState;
   onUpdate: (patch: Partial<AppState>) => void;
   onBack: () => void;
-  onNavigate: (s: 'editorial' | 'facts' | 'premium' | 'auth' | 'sounds' | 'themes' | 'alarms') => void;
+  onNavigate: (s: Extract<Screen, 'editorial' | 'facts' | 'premium' | 'auth' | 'themes' | 'sounds' | 'alarms'>) => void;
 }
 
 export function Settings({ state, onUpdate, onBack, onNavigate }: Props) {
@@ -24,15 +24,11 @@ export function Settings({ state, onUpdate, onBack, onNavigate }: Props) {
 
           <SectionLabel>Morning</SectionLabel>
           <div className="overflow-hidden rounded-3xl bg-white shadow-soft">
-            <Row label="Alarm" sublabel={`${state.alarms.length} alarms`} onClick={() => onNavigate('alarms')} right={<ChevronRight className="h-4 w-4 text-ink/30" />} />
+            <Row label="Alarm" sublabel={`${state.alarms.length} alarms`} onClick={onBack} right={<ChevronRight className="h-4 w-4 text-ink/30" />} />
             <div className="border-t border-paper-fog" />
-            <Row label="Morning sound" sublabel={getSound(state.morningSound).name} onClick={() => onNavigate('sounds')} right={<ChevronRight className="h-4 w-4 text-ink/30" />} />
+             <Row label="Morning sound" sublabel={getSound(state.morningSound).name} onClick={() => onNavigate('sounds')} right={<ChevronRight className="h-4 w-4 text-ink/30" />} />
             <div className="border-t border-paper-fog" />
-            <Row label="Gratitude" sublabel={state.gratitude.length > 0 ? `${state.gratitude.length} entries` : 'On'} right={<Toggle on={true} onChange={() => {}} />} />
-            <div className="border-t border-paper-fog" />
-            <Row label="Tasks" sublabel={`${state.tasks.length} tasks`} right={<Toggle on={state.notifications} onChange={(v) => onUpdate({ notifications: v })} />} />
-            <div className="border-t border-paper-fog" />
-            <Row label="Reminders" right={<Toggle on={state.notifications} onChange={(v) => onUpdate({ notifications: v })} />} />
+             <Row label="Gratitude" sublabel={state.gratitude.length > 0 ? `${state.gratitude.length} entries` : 'Ready each morning'} right={<span className="text-xs font-medium text-sage-600">On</span>} />
             <div className="border-t border-paper-fog" />
             <Row label="Quiet Morning" sublabel={state.quietMorning ? `${state.quietMorning} min` : 'Off'}
               right={
@@ -72,12 +68,12 @@ export function Settings({ state, onUpdate, onBack, onNavigate }: Props) {
               }
             />
             <div className="border-t border-paper-fog" />
-            <Row label="Focus sounds" sublabel={getSound(state.focusSound).name} onClick={() => onNavigate('sounds')} right={<ChevronRight className="h-4 w-4 text-ink/30" />} />
+             <Row label="Focus sounds" sublabel={getSound(state.focusSound).name} onClick={() => onNavigate('sounds')} right={<ChevronRight className="h-4 w-4 text-ink/30" />} />
           </div>
 
           <SectionLabel>Appearance</SectionLabel>
           <div className="overflow-hidden rounded-3xl bg-white shadow-soft">
-            <Row label="Theme" sublabel={getTheme(state.theme).name} onClick={() => onNavigate('themes')} right={<ChevronRight className="h-4 w-4 text-ink/30" />} />
+             <Row label="Theme" sublabel={getTheme(state.theme).name} onClick={() => onNavigate('themes')} right={<ChevronRight className="h-4 w-4 text-ink/30" />} />
             <div className="border-t border-paper-fog" />
             <Row label="Dark mode" right={<Toggle on={state.darkMode} onChange={(v) => onUpdate({ darkMode: v })} />} />
             <div className="border-t border-paper-fog" />
@@ -96,6 +92,10 @@ export function Settings({ state, onUpdate, onBack, onNavigate }: Props) {
           <SectionLabel>Notifications</SectionLabel>
           <div className="overflow-hidden rounded-3xl bg-white shadow-soft">
             <Row label="Alarms" right={<Toggle on={state.notifications} onChange={(v) => onUpdate({ notifications: v })} />} />
+            <div className="border-t border-paper-fog" />
+             <Row label="Tasks" right={<Toggle on={state.notifications} onChange={(v) => onUpdate({ notifications: v })} />} />
+            <div className="border-t border-paper-fog" />
+             <Row label="Reminders" right={<Toggle on={state.notifications} onChange={(v) => onUpdate({ notifications: v })} />} />
           </div>
 
           <SectionLabel>Account</SectionLabel>
@@ -111,17 +111,7 @@ export function Settings({ state, onUpdate, onBack, onNavigate }: Props) {
 
           <SectionLabel>About</SectionLabel>
           <div className="overflow-hidden rounded-3xl bg-white shadow-soft">
-            <Row label="Why Luma" onClick={() => onNavigate('editorial')} right={<ChevronRight className="h-4 w-4 text-ink/30" />} />
-            <div className="border-t border-paper-fog" />
-            <Row label="Dopamine & Stimulation" onClick={() => onNavigate('editorial')} right={<ChevronRight className="h-4 w-4 text-ink/30" />} />
-            <div className="border-t border-paper-fog" />
-            <Row label="Internet Consumption" onClick={() => onNavigate('editorial')} right={<ChevronRight className="h-4 w-4 text-ink/30" />} />
-            <div className="border-t border-paper-fog" />
-            <Row label="Feed Your Mind Well" onClick={() => onNavigate('editorial')} right={<ChevronRight className="h-4 w-4 text-ink/30" />} />
-            <div className="border-t border-paper-fog" />
             <Row label="Luma Facts" onClick={() => onNavigate('facts')} right={<ChevronRight className="h-4 w-4 text-ink/30" />} />
-            <div className="border-t border-paper-fog" />
-            <Row label="Digital Wellbeing" onClick={() => onNavigate('editorial')} right={<ChevronRight className="h-4 w-4 text-ink/30" />} />
             <div className="border-t border-paper-fog" />
             <Row label="Terms" onClick={() => onNavigate('auth')} right={<ChevronRight className="h-4 w-4 text-ink/30" />} />
             <div className="border-t border-paper-fog" />
