@@ -26,8 +26,8 @@ export function Themes({ state, onUpdate, onBack, onPremium }: Props) {
     const selected = state.theme === t.id;
     const fav = state.favoriteThemes.includes(t.id);
     const locked = t.premium && state.premium === 'free';
-    return (
-      <button onClick={() => select(t.id, locked)} className={`press relative overflow-hidden rounded-3xl bg-white text-left shadow-soft transition-all ${selected ? 'ring-2 ring-ink ring-offset-2 ring-offset-paper-warm' : ''} ${locked ? 'opacity-70' : ''}`}>
+     return (
+       <div role="button" tabIndex={0} onClick={() => select(t.id, locked)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') select(t.id, locked); }} className={`press relative overflow-hidden rounded-3xl bg-white text-left shadow-soft transition-all ${selected ? 'ring-2 ring-ink ring-offset-2 ring-offset-paper-warm' : ''} ${locked ? 'opacity-70' : ''}`}>
         <div className="relative h-32 overflow-hidden">
           <ThemeBackground themeId={t.id} />
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
@@ -41,9 +41,9 @@ export function Themes({ state, onUpdate, onBack, onPremium }: Props) {
           </div>
           <button onClick={(e) => { e.stopPropagation(); hapticSoft(); onUpdate({ favoriteThemes: fav ? state.favoriteThemes.filter((x) => x !== t.id) : [...state.favoriteThemes, t.id] }); }} className="press-sm p-1">
             <Heart className={`h-4 w-4 ${fav ? 'fill-blush-400 text-blush-400' : 'text-ink/20'}`} />
-          </button>
+           </button>
         </div>
-      </button>
+       </div>
     );
   };
 
