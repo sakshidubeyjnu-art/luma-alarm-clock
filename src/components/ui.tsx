@@ -17,7 +17,7 @@ export function ScreenHeader({
       <div className="flex items-center justify-between px-5 py-3.5">
         <div className="flex items-center gap-2">
           {onBack && (
-            <button onClick={() => { hapticSoft(); onBack(); }} className="press-sm -ml-1.5 rounded-full p-1.5 text-ink/60">
+            <button aria-label={`Back from ${title}`} onClick={() => { hapticSoft(); onBack(); }} className="press-sm -ml-1.5 rounded-full p-1.5 text-ink/60 hover:bg-ink/5">
               <ChevronLeft className="h-5 w-5" />
             </button>
           )}
@@ -47,7 +47,7 @@ export function PrimaryButton({
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`press w-full rounded-2xl bg-ink py-3.5 text-center font-medium text-white shadow-soft disabled:opacity-40 ${className}`}
+      className={`press w-full rounded-2xl bg-ink py-3.5 text-center font-medium text-white shadow-card transition-shadow hover:shadow-soft disabled:opacity-40 ${className}`}
     >
       {children}
     </button>
@@ -66,7 +66,7 @@ export function GhostButton({
   return (
     <button
       onClick={onClick}
-      className={`press w-full rounded-2xl bg-paper-fog py-3.5 text-center font-medium text-ink ${className}`}
+      className={`press w-full rounded-2xl bg-paper-fog py-3.5 text-center font-medium text-ink transition-colors hover:bg-paper-fog/70 ${className}`}
     >
       {children}
     </button>
@@ -89,12 +89,23 @@ export function Row({
   onClick?: () => void;
 }) {
   return (
-    <button onClick={onClick} disabled={!onClick} className="press flex w-full items-center justify-between px-4 py-3.5 text-left">
+    <div
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={(event) => {
+        if (onClick && (event.key === 'Enter' || event.key === ' ')) {
+          event.preventDefault();
+          onClick();
+        }
+      }}
+      className={`press flex w-full items-center justify-between px-4 py-3.5 text-left ${onClick ? 'cursor-pointer hover:bg-paper-fog/45' : ''}`}
+    >
       <div>
         <p className="text-[15px] font-medium text-ink">{label}</p>
         {sublabel && <p className="text-xs text-ink/45">{sublabel}</p>}
       </div>
       {right}
-    </button>
+    </div>
   );
 }
