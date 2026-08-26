@@ -31,6 +31,11 @@ function App() {
   const go = useCallback((next: Screen) => setScreen(next), []);
   const goTab = useCallback((tab: Tab) => setScreen(tab), []);
 
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', state.darkMode);
+    return () => document.documentElement.classList.remove('dark');
+  }, [state.darkMode]);
+
   const startAfterSplash = useCallback(() => {
     setScreen(state.onboarded ? 'home' : 'onboarding');
   }, [state.onboarded]);
@@ -109,7 +114,7 @@ function App() {
   let content: React.ReactNode;
   switch (screen) {
     case 'alarms':
-      content = <Alarms state={state} onAdd={store.addAlarm} onUpdate={store.updateAlarm} onRemove={store.removeAlarm} onPreviewRing={() => ring()} />;
+      content = <Alarms state={state} onAdd={store.addAlarm} onUpdate={store.updateAlarm} onRemove={store.removeAlarm} onPreviewRing={() => ring()} onPremium={() => go('premium')} />;
       break;
     case 'focus':
       content = <Focus state={state} onUpdate={store.update} onNavigate={(s) => go(s)} />;
@@ -118,7 +123,7 @@ function App() {
       content = <Tasks state={state} onAdd={store.addTask} onUpdate={store.updateTask} onRemove={store.removeTask} onUpdatePriority={(priority) => store.update({ priority })} />;
       break;
     case 'profile':
-      content = <Profile state={state} onNavigate={(s) => go(s)} />;
+      content = <Profile state={state} onNavigate={(s) => go(s)} onUpdate={store.update} />;
       break;
     case 'sounds':
       content = <Sounds state={state} onUpdate={store.update} onBack={() => backTo('profile')} onPremium={() => go('premium')} />;
@@ -149,7 +154,7 @@ function App() {
       break;
     case 'home':
     default:
-      content = <Home state={state} onNavigate={(s) => go(s)} onToggleRoutine={store.toggleRoutine} onAddGratitude={store.addGratitude} />;
+      content = <Home state={state} onNavigate={(s) => go(s)} onToggleRoutine={store.toggleRoutine} onToggleAlarm={(id, enabled) => store.updateAlarm(id, { enabled })} onAddGratitude={store.addGratitude} />;
       break;
   }
 
@@ -158,7 +163,7 @@ function App() {
   const activeTab: Tab = tabScreens.includes(screen) ? screen as Tab : 'home';
 
   return (
-    <div className="min-h-screen bg-[#0d0f1a]">
+    <div className="noise min-h-screen bg-[#d9d5cb]">
       <div className="relative mx-auto h-[100dvh] w-full max-w-[440px]">
         {content}
         {showNav && <BottomNav active={activeTab} onChange={goTab} />}
