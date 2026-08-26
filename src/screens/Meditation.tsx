@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Play, Pause, RotateCcw, Volume2 } from 'lucide-react';
+import { Play, Pause, RotateCcw, Check } from 'lucide-react';
 import { ScreenHeader, PrimaryButton } from '@/components/ui';
 import { meditationSounds, getSound } from '@/lib/sounds';
 import { getAudioManager, subscribeAudio, type AudioStatus } from '@/lib/audio';
@@ -129,7 +129,7 @@ export function Meditation({ state, onBack }: Props) {
                     <p className="text-sm font-medium">{s.name}</p>
                     <p className={`text-xs ${selectedTrack === s.id ? 'text-white/50' : 'text-ink/45'}`}>{s.description}</p>
                   </div>
-                  {selectedTrack === s.id && <span className="text-sm">✓</span>}
+                   {selectedTrack === s.id && <Check className="h-4 w-4" />}
                 </button>
               ))}
             </div>
@@ -138,7 +138,7 @@ export function Meditation({ state, onBack }: Props) {
           </div>
         ) : isDone ? (
           <div className="flex flex-col items-center px-8 pt-32 text-center animate-scale-in">
-            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-sage-100"><span className="font-display text-3xl text-sage-700">✓</span></div>
+             <div className="flex h-24 w-24 items-center justify-center rounded-full bg-sage-100"><Check className="h-10 w-10 text-sage-700" strokeWidth={1.8} /></div>
             <h2 className="mt-6 font-display text-3xl font-medium text-ink">Well done.</h2>
             <p className="mt-2 text-ink/50">You made space for a little quiet.</p>
             <div className="mt-8 w-full"><PrimaryButton onClick={reset}>Again</PrimaryButton></div>
