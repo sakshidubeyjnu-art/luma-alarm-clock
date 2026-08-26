@@ -70,10 +70,16 @@ export function TimePicker({ value, onChange }: Props) {
     if (type === 'minute' && index !== minute) selectMinute(index);
   };
 
-  const renderWheel = (type: 'hour' | 'minute', items: number[], selected: number, onSelect: (v: number) => void, ref: React.RefObject<HTMLDivElement>) => (
+  const Wheel = ({ type, items, selected, onSelect, ref }: {
+    type: 'hour' | 'minute';
+    items: number[];
+    selected: number;
+    onSelect: (value: number) => void;
+    ref: React.RefObject<HTMLDivElement | null>;
+  }) => (
     <div
       ref={ref}
-      onScroll={(e) => handleScroll(type, e.currentTarget)}
+      onScroll={(event) => handleScroll(type, event.currentTarget)}
       className="no-scrollbar h-[220px] w-20 overflow-y-auto snap-y snap-mandatory"
     >
       <div className="h-[88px]" />
@@ -97,9 +103,9 @@ export function TimePicker({ value, onChange }: Props) {
     <div className="flex flex-col items-center">
       <div className="relative flex items-center justify-center">
         <div className="pointer-events-none absolute left-1/2 top-1/2 h-11 w-40 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-paper-fog/60" />
-        {renderWheel('hour', hours, hour, selectHour, hourRef)}
+        <Wheel type="hour" items={hours} selected={hour} onSelect={selectHour} ref={hourRef} />
         <span className="font-display text-2xl text-ink/40">:</span>
-        {renderWheel('minute', minutes, minute, selectMinute, minuteRef)}
+        <Wheel type="minute" items={minutes} selected={minute} onSelect={selectMinute} ref={minuteRef} />
       </div>
       <div className="mt-3 flex rounded-xl bg-paper-fog/80 p-1">
         {(['AM', 'PM'] as const).map((option) => (
