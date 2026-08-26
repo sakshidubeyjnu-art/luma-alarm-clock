@@ -98,7 +98,10 @@ class AudioManager {
   play(id: SoundId, loop = false): void {
     this.error = null;
     const file = getSoundFile(id);
-    const encoded = file.split('/').map((segment) => encodeURIComponent(segment)).join('/');
+    const encoded = new URL(
+      file.split('/').map((segment) => encodeURIComponent(segment)).join('/'),
+      document.baseURI,
+    ).href;
 
     if (this.currentId === id && this.state === 'paused') {
       this.loop = loop;
@@ -203,4 +206,3 @@ export function subscribeAudio(listener: Listener): () => void {
   return getAudioManager().subscribe(listener);
 }
 
-export type { AudioStatus };
