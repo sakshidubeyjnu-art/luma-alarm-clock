@@ -20,6 +20,22 @@ export function AlarmRinging({ alarm, onStop, onSnooze, onStartMorning }: Props)
 
   useEffect(() => {
     const mgr = getAudioManager();
+    const previousVolume = mgr.getStatus().volume;
+    let rampTimer: number | null = null;
+    const rampStartedAt = Date.now();
+
+    if (alarm.gradualVolume) {
+      mgr.setVolume(0.08);
+      rampTimer = window.setInterval(() => {
+        const progress = Math.min(1, (Date.now() - rampStartedAt) / 30000);
+        mgr.setVolume(0.08 + progress * (Math.max(previousVolume, 0.7) - 0.08));
+        if (progress >= 1 && rampTimer !== null) {
+          window.clearInterval(rampTimer);
+          rampTimer = null;
+        }
+      }, 1000);
+    }
+
     mgr.play(alarm.sound, true);
     hapticStrong();
 
@@ -30,6 +46,8 @@ export function AlarmRinging({ alarm, onStop, onSnooze, onStartMorning }: Props)
     return () => {
       unsub();
       mgr.stop();
+      if (rampTimer !== null) window.clearInterval(rampTimer);
+      mgr.setVolume(previousVolume);
     };
   }, [alarm.sound]);
 
