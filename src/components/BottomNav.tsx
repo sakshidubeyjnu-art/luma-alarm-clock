@@ -12,13 +12,13 @@ export function BottomNav({ active, onChange }: { active: Tab; onChange: (t: Tab
   ];
 
   return (
-    <nav className="absolute bottom-0 left-0 right-0 z-30 glass border-t border-black/5 safe-bottom">
+    <nav className="absolute bottom-0 left-0 right-0 z-30 glass border-t border-ink/10 safe-bottom">
       <div className="flex items-stretch justify-around px-2 pt-2 pb-1">
         {items.map((item) => {
           const isActive = active === item.id;
           const Icon = item.icon;
           return (
-            <button key={item.id}
+             <button key={item.id} aria-label={`Go to ${item.label}`}
               onClick={() => { hapticSoft(); onChange(item.id); }}
               className="press-sm flex flex-1 flex-col items-center gap-1 py-1.5"
             >
