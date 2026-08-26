@@ -78,7 +78,7 @@ export function Tasks({ state, onAdd, onUpdate, onRemove, onUpdatePriority }: Pr
                   <p className={`text-[15px] font-medium ${t.completed ? 'text-ink/40 line-through' : 'text-ink'}`}>{t.title}</p>
                   <p className="text-[11px] uppercase tracking-wide text-ink/35">{CATEGORIES.find((c) => c.id === t.category)?.label}</p>
                 </div>
-                <button onClick={() => { hapticMedium(); onRemove(t.id); }} className="press-sm p-1 text-ink/20 hover:text-blush-500">
+                 <button onClick={() => { if (window.confirm(`Delete “${t.title}”?`)) { hapticMedium(); onRemove(t.id); } }} className="press-sm p-1 text-ink/20 hover:text-blush-500">
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
