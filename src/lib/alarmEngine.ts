@@ -90,6 +90,7 @@ class AlarmEngine {
   }
 
   restoreOnVisible(): void {
+    if (document.visibilityState !== 'visible') return;
     this.reschedule();
   }
 
