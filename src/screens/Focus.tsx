@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Play, Pause, RotateCcw, Coffee, Volume2 } from 'lucide-react';
+import { Play, Pause, RotateCcw, Coffee, Volume2, Check } from 'lucide-react';
 import { ScreenHeader, PrimaryButton } from '@/components/ui';
 import { msToHMS } from '@/lib/time';
 import { getSound, sounds } from '@/lib/sounds';
@@ -10,7 +10,7 @@ import type { AppState, SoundId } from '@/lib/types';
 interface Props {
   state: AppState;
   onUpdate: (patch: Partial<AppState>) => void;
-  onNavigate: (s: 'boring' | 'tasks' | 'home') => void;
+  onNavigate: (s: 'boring') => void;
 }
 
 type Phase = 'idle' | 'running' | 'paused' | 'break' | 'done';
@@ -147,7 +147,7 @@ export function Focus({ state, onUpdate, onNavigate }: Props) {
                     <button key={s.id} onClick={() => { hapticSoft(); onUpdate({ focusSound: s.id as SoundId }); }}
                       className={`press-sm flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left ${state.focusSound === s.id ? 'bg-ink text-white' : 'bg-paper-fog text-ink/70'}`}>
                       <span className="text-sm font-medium">{s.name}</span>
-                      {state.focusSound === s.id && <span className="text-xs">✓</span>}
+                       {state.focusSound === s.id && <Check className="h-3.5 w-3.5" />}
                     </button>
                   ))}
                 </div>
