@@ -1,13 +1,12 @@
-import { useState } from 'react';
-import { Plus, Copy, Trash2, Bell, ChevronRight, Play } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Plus, Copy, Trash2, Bell, ChevronRight, Play, Pause, Lock } from 'lucide-react';
 import { ScreenHeader, PrimaryButton, GhostButton, SectionLabel, Row } from '@/components/ui';
 import { Sheet } from '@/components/Sheet';
 import { TimePicker } from '@/components/TimePicker';
 import { Toggle } from '@/components/Toggle';
-import { ThemeBackground } from '@/components/ThemeBackground';
 import { formatTimeShort } from '@/lib/time';
 import { sounds } from '@/lib/sounds';
-import { getAudioManager } from '@/lib/audio';
+import { getAudioManager, subscribeAudio, type AudioStatus } from '@/lib/audio';
 import { getAlarmEngine } from '@/lib/alarmEngine';
 import { themes } from '@/lib/themes';
 import { hapticSoft, hapticMedium } from '@/lib/haptic';
@@ -37,11 +36,15 @@ interface Props {
   onUpdate: (id: string, patch: Partial<Alarm>) => void;
   onRemove: (id: string) => void;
   onPreviewRing: () => void;
+  onPremium: () => void;
 }
 
-export function Alarms({ state, onAdd, onUpdate, onRemove, onPreviewRing }: Props) {
+export function Alarms({ state, onAdd, onUpdate, onRemove, onPreviewRing, onPremium }: Props) {
   const [editing, setEditing] = useState<Alarm | null>(null);
   const [isNew, setIsNew] = useState(false);
+  const [audioStatus, setAudioStatus] = useState<AudioStatus>(getAudioManager().getStatus());
+
+  useEffect(() => subscribeAudio(setAudioStatus), []);
 
   const openNew = () => {
     hapticSoft();
@@ -112,21 +115,23 @@ export function Alarms({ state, onAdd, onUpdate, onRemove, onPreviewRing }: Prop
         ) : (
           <div className="space-y-3 px-4 pt-4">
             {state.alarms.map((a) => (
-              <div key={a.id} className="overflow-hidden rounded-3xl bg-white shadow-soft">
-                <button onClick={() => openEdit(a)} className="press flex w-full items-center justify-between px-5 py-4 text-left">
+               <div key={a.id} className="overflow-hidden rounded-3xl bg-white shadow-soft">
+                 <div role="button" tabIndex={0} onClick={() => openEdit(a)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') openEdit(a); }} className="press flex w-full cursor-pointer items-center justify-between px-5 py-4 text-left">
                   <div>
                     <p className={`font-display text-3xl font-medium ${a.enabled ? 'text-ink' : 'text-ink/35'}`}>{formatTimeShort(a.time)}</p>
                     <p className={`text-sm ${a.enabled ? 'text-ink/60' : 'text-ink/30'}`}>{a.label} · {repeatLabel(a)}</p>
                   </div>
-                  <Toggle on={a.enabled} onChange={(v) => onUpdate(a.id, { enabled: v })} />
-                </button>
+                   <span onClick={(event) => event.stopPropagation()}>
+                     <Toggle on={a.enabled} onChange={(v) => onUpdate(a.id, { enabled: v })} />
+                   </span>
+                 </div>
                 {a.enabled && (
                   <div className="flex border-t border-paper-fog px-5 py-1">
                     <button onClick={() => duplicate(a)} className="press-sm flex flex-1 items-center justify-center gap-1.5 py-2 text-xs font-medium text-ink/50">
                       <Copy className="h-3.5 w-3.5" /> Duplicate
                     </button>
                     <div className="w-px bg-paper-fog" />
-                    <button onClick={() => { hapticMedium(); onRemove(a.id); }} className="press-sm flex flex-1 items-center justify-center gap-1.5 py-2 text-xs font-medium text-blush-500">
+                     <button onClick={() => { if (window.confirm(`Delete “${a.label}”?`)) { hapticMedium(); onRemove(a.id); } }} className="press-sm flex flex-1 items-center justify-center gap-1.5 py-2 text-xs font-medium text-blush-500">
                       <Trash2 className="h-3.5 w-3.5" /> Delete
                     </button>
                   </div>
@@ -136,7 +141,7 @@ export function Alarms({ state, onAdd, onUpdate, onRemove, onPreviewRing }: Prop
             <button onClick={onPreviewRing} className="press mx-auto mt-2 flex items-center gap-1.5 px-4 py-2 text-xs text-ink/40">
               Preview alarm screen <ChevronRight className="h-3 w-3" />
             </button>
-            <button onClick={() => {
+             <button aria-label="Test alarm in 3 seconds" onClick={() => {
               hapticSoft();
               const testAlarm = state.alarms.find((a) => a.enabled) ?? state.alarms[0];
               if (testAlarm) getAlarmEngine().snooze(testAlarm, 0.05);
@@ -153,6 +158,9 @@ export function Alarms({ state, onAdd, onUpdate, onRemove, onPreviewRing }: Prop
           <div className="space-y-1">
             <div className="py-4">
               <TimePicker value={editing.time} onChange={(v) => setEditing({ ...editing, time: v })} />
+               <p className="mt-4 text-center text-sm font-medium text-ink/60">
+                 Alarm set for <span className="text-ink">{formatTimeShort(editing.time)}</span>
+               </p>
             </div>
 
             <div className="rounded-2xl bg-white px-4 py-3">
@@ -198,20 +206,25 @@ export function Alarms({ state, onAdd, onUpdate, onRemove, onPreviewRing }: Prop
             <SectionLabel>Sound</SectionLabel>
             <div className="grid grid-cols-2 gap-2">
               {sounds.map((s) => (
-                <div key={s.id} className={`flex items-center gap-2 rounded-2xl px-3 py-3 ${editing.sound === s.id ? 'bg-ink text-white' : 'bg-white text-ink'}`}>
-                  <button onClick={() => { hapticSoft(); setEditing({ ...editing, sound: s.id as SoundId }); }} className="flex-1 text-left">
+                <div key={s.id} className={`flex items-center gap-2 rounded-2xl px-3 py-3 ${editing.sound === s.id ? 'bg-ink text-white' : 'bg-white text-ink'} ${s.premium && state.premium === 'free' ? 'opacity-60' : ''}`}>
+                  <button onClick={() => {
+                    hapticSoft();
+                    if (s.premium && state.premium === 'free') onPremium();
+                    else setEditing({ ...editing, sound: s.id as SoundId });
+                  }} className="flex-1 text-left">
                     <p className="text-sm font-medium">{s.name}</p>
                     {s.premium && <p className="text-[10px] opacity-50">Premium</p>}
                   </button>
                   <button onClick={() => {
                     hapticSoft();
+                    if (s.premium && state.premium === 'free') { onPremium(); return; }
                     const mgr = getAudioManager();
                     const status = mgr.getStatus();
                     if (status.currentId === s.id && status.state === 'playing') mgr.pause();
                     else if (status.currentId === s.id && status.state === 'paused') mgr.resume();
                     else mgr.play(s.id, false);
                   }} className={`press-sm flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${editing.sound === s.id ? 'bg-white/15' : 'bg-paper-fog'}`}>
-                    <Play className="h-3 w-3" fill="currentColor" />
+                      {s.premium && state.premium === 'free' ? <Lock className="h-3 w-3" /> : audioStatus.currentId === s.id && audioStatus.state === 'playing' ? <Pause className="h-3 w-3" fill="currentColor" /> : <Play className="h-3 w-3" fill="currentColor" />}
                   </button>
                 </div>
               ))}
@@ -248,6 +261,10 @@ export function Alarms({ state, onAdd, onUpdate, onRemove, onPreviewRing }: Prop
               <Row label="Gradual volume" sublabel="Gently increase" right={<Toggle on={editing.gradualVolume} onChange={(v) => setEditing({ ...editing, gradualVolume: v })} />} />
             </div>
 
+            <div className="space-y-2 pt-5">
+              <PrimaryButton onClick={save}>Save alarm</PrimaryButton>
+            </div>
+
             <SectionLabel>Wake mission {state.premium === 'free' && <span className="text-blush-500">· Premium</span>}</SectionLabel>
             <div className="space-y-1.5">
               {MISSIONS.map((m) => {
@@ -266,8 +283,7 @@ export function Alarms({ state, onAdd, onUpdate, onRemove, onPreviewRing }: Prop
             </div>
 
             <div className="space-y-2 pt-5">
-              <PrimaryButton onClick={save}>Save alarm</PrimaryButton>
-              {!isNew && <GhostButton onClick={() => { hapticMedium(); onRemove(editing.id); setEditing(null); }} className="text-blush-500">Delete alarm</GhostButton>}
+               {!isNew && <GhostButton onClick={() => { if (window.confirm(`Delete “${editing.label}”?`)) { hapticMedium(); onRemove(editing.id); setEditing(null); } }} className="text-blush-500">Delete alarm</GhostButton>}
             </div>
           </div>
         )}
